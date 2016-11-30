@@ -26,7 +26,7 @@
 ##
 # Faster Than Light Pool Thread implementation
 #
-# Author::    Amedeo Setti (amedeosetti@gmail.com), Matteo Ragni (info@ragni.me)
+# Authors::    Amedeo Setti (info@amedeosetti.com), Matteo Ragni (info@ragni.me)
 # Copyright:: Copyright (c) 2016 Amedeo Setti, Matteo Ragni
 # License::   MIT
 module FtlPool
@@ -38,49 +38,117 @@ module FtlPool
     ##
     # Returns the hardware thread number. It is also used as
     # default for creating a new ThreadPool obect
-    def self.HW_THREAD
-      # TODO Move to a C++ defined constant
-    end
+    HARDWARE_THREADS = FtlPool.hardware_threads
     ##
     # Initialize a new `ThreadPool` object. Requires as input
     # the number of thread that handles. Default to the number
     # of hardware thread available.
-    def initialize(n = ThreadPool.HW_THREAD)
+    def ThreadPool.new(n = FtlPool::HARDWARE_THREADS)
       raise ArgumentError, "Pool size must be a Fixnum" unless n.is_a? Fixnum
+      raise ArgumentError, "Pool size must be positive" if n <= 0
+      super(n)
     end
     ##
     # Resizes current `ThreadPool` thread number. Requires as input
     # the number of thread to handle. Default to the number of hardware
     # thread available
-    def resize(n = FtlPool.HW_THREAD)
+    def size=(n = FtlPool::HARDWARE_THREADS)
       raise ArgumentError, "Pool size must be a Fixnum" unless n.is_a? Fixnum
-      self
+      raise ArgumentError, "Pool size must be positive" if n <= 0
+      self._resize n
+    end
+
+    alias :synchronize :sync
+    alias :end_synchronize :unsynchronize
+    alias :end_synchronize :unsync
+    alias :end_synchronize :desync
+
+    ##
+    # Set sleep timout. It must be a positive integer.
+    # A scale as :s, :sec, :msec, :ms or :ns or :nsec
+    def sleep=(s)
+      scale = :ns
+      time  = 0
+      if s.is_a? Fixnum
+        time, scale = s, :ns
+      elsif s.is_a? Array
+        if s[0].is_a? Fixnum and s[1].is_a? Symbol
+          time, scale = s
+        elsif s[1].is_a? Fixnum and s[0].is_a? Symbol
+          scale, time = s
+        else
+          raise ArgumentError, "Sleep value povided in a bad format"
+        end
+      else
+        raise ArgumentError, "Sleep value povided in a bad format"
+      end
+      raise ArgumentError, "Timer must be positive" if time <= 0
+      case scale
+      when :nsec, :nano, :ns, :nsec, :nanosec, :nanoseconds
+        self._set_sleep_time_ns(time)
+      when :msec, :millisec, :ms, :msec, :milli, :milliseconds
+        self._set_sleep_time_ms(time)
+      when :sec, :s, :seconds
+        self._set_sleep_time_s(time)
+      else
+        raise ArgumentError, "Bad Scale for timer given"
+      end
     end
     ##
-    # Awake ThreadPool
-    def awake
-      self
+    # Set sleep timout. It must be a positive integer.
+    # in nanoseconds
+    def sleep_ns=(s = 1)
+      raise ArgumentError, "Timer must be a Fixnum" unless time.is_a? Fixnum
+      raise ArgumentError, "Timer must be positive" if time <= 0
+      self._set_sleep_time_ns(time)
     end
     ##
-    # Stop current thread's jobs
-    def stop
-      self
+    # Set sleep timout. It must be a positive integer.
+    # in milliseconds
+    def sleep_ms=(s = 1)
+      raise ArgumentError, "Timer must be a Fixnum" unless time.is_a? Fixnum
+      raise ArgumentError, "Timer must be positive" if time <= 0
+      self._set_sleep_time_ms(time)
     end
     ##
-    # Wait in hold until next task for a thread arrives
-    def wait
-      self
+    # Set sleep timout. It must be a positive integer.
+    # in seconds
+    def sleep_s=(s = 1)
+      raise ArgumentError, "Timer must be a Fixnum" unless time.is_a? Fixnum
+      raise ArgumentError, "Timer must be positive" if time <= 0
+      self._set_sleep_time_s(time)
+    end
+
+    ##
+    # Get sleep timout.
+    # A scale as :s, :sec, :msec, :ms or :ns or :nsec
+    def sleep(s = :ns)
+      raise ArgumentError, "Scale must be a Symbol" unless s.is_a? Symbol
+      time = self.sleep_ns
+      case s
+      when :nsec, :nano, :ns, :nsec, :nanosec, :nanoseconds
+        time
+      when :msec, :millisec, :ms, :msec, :milli, :milliseconds
+        time * 1000000
+      when :sec, :s, :seconds
+        time * 1000000 * 1000
+      else
+        raise ArgumentError, "Bad Scale for timer given"
+      end
     end
     ##
-    # Syncronize tasks in thread
-    def sync
-      self
+    # Get sleep timout. In milliseconds
+    def sleep_ms
+      return self.sleep_ns * 1000000
     end
     ##
-    # Unsyncronize tasks in thread
-    def unsync
-      self
+    # Get sleep timout. In seconds
+    def sleep_s
+      return self.sleep_ns * 1000000 * 1000
     end
+
+    # TODO to be completed below here!
+
     ##
     # Push new closure inside the `ThreadPool`. It accept
     # * `Proc` objects (as `Array`)
@@ -110,10 +178,9 @@ module FtlPool
 
     private
     ##
-    # 
+    #
     def push_proc(p)
       raise ArgumentError, "Requires a Proc" unless p.is_a? Proc
-
     end
 
     def push_block(&blk)
