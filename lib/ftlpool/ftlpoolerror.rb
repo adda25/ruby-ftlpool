@@ -29,8 +29,8 @@
 # Author::    Amedeo Setti (amedeosetti@gmail.com), Matteo Ragni (info@ragni.me)
 # Copyright:: Copyright (c) 2016 Amedeo Setti, Matteo Ragni
 # License::   MIT
-module FtlPool; end # module FtlPool
+module FtlPool
+  class FtlPoolError
 
-%w|ftlpool/threadpool.rb|.each do |r|
-  require File.expand_path(r, File.dirname(__FILE__))
+  end
 end
