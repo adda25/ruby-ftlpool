@@ -1,11 +1,8 @@
 #!/usr/bin/env gem
 
 require 'date'
-def collect_files
-  Dir.glob("**/*") # TODO we will specialize it later
-end
 
-Gem::Specification.new do |spec|
+Gem::Specification.new "ftlpool" do |spec|
   spec.name        = "ftlpool"
   spec.version     = "0.0.0"
   spec.date        = DateTime.now.strftime("%F")
@@ -17,7 +14,9 @@ Gem::Specification.new do |spec|
   EOS
   spec.authors     = ["Amedeo Setti", "Matteo Ragni"]
   spec.email       = ["amedeosetti@gmail.com", "info@ragni.me"]
-  spec.file        = collect_files
+  spec.platform    = Gem::Platform::RUBY
+  spec.files       = Dir.glob("lib/**/*")
+  spec.extensions  = %w[ext/FtlPoolCPP/extconf.rb]
   spec.homepage    = 'http://rubygems.com/amedeosetti/fastpool'
   spec.license     = 'MIT'
 end

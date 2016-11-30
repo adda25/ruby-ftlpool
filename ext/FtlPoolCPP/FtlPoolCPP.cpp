@@ -296,7 +296,7 @@ ftlpool_tp_pool_sleep_time_ns(VALUE self) {
 }
 
 extern "C" void
-Init_FtlPool() {
+Init_FtlPoolCPP() {
   VALUE ftlpool = rb_define_module("FtlPool");
   VALUE tp      = rb_define_class_under(ftlpool, "ThreadPool", rb_cObject);
 

@@ -43,7 +43,7 @@ module FtlPool
     # Initialize a new `ThreadPool` object. Requires as input
     # the number of thread that handles. Default to the number
     # of hardware thread available.
-    def ThreadPool.new(n = FtlPool::HARDWARE_THREADS)
+    def ThreadPool.new(n = FtlPool.hardware_threads)
       raise ArgumentError, "Pool size must be a Fixnum" unless n.is_a? Fixnum
       raise ArgumentError, "Pool size must be positive" if n <= 0
       super(n)
@@ -52,16 +52,16 @@ module FtlPool
     # Resizes current `ThreadPool` thread number. Requires as input
     # the number of thread to handle. Default to the number of hardware
     # thread available
-    def size=(n = FtlPool::HARDWARE_THREADS)
+    def size=(n = FtlPool.hardware_threads)
       raise ArgumentError, "Pool size must be a Fixnum" unless n.is_a? Fixnum
       raise ArgumentError, "Pool size must be positive" if n <= 0
       self._resize n
     end
 
-    alias :synchronize :sync
-    alias :end_synchronize :unsynchronize
-    alias :end_synchronize :unsync
-    alias :end_synchronize :desync
+    #alias :sync :synchronize
+    #alias :unsynchronize :end_synchronize
+    #alias :unsync :end_synchronize
+    #alias :desync :end_synchronize
 
     ##
     # Set sleep timout. It must be a positive integer.

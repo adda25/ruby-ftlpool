@@ -1,7 +1,0 @@
-desc "Build the shared object"
-task :default do
-  sh "g++ -std=c++11 -pthread -I/usr/include/ruby-2.3.0 \
-                              -I/usr/include/ruby-2.3.0/x86_64-linux \
-                              -I./ThreadPool FtlPool/ThreadPool_rb.cpp \
-                              -shared -fPIC -o FtlPool.so"
-end

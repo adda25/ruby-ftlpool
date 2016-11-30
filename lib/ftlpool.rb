@@ -31,6 +31,8 @@
 # License::   MIT
 module FtlPool; end # module FtlPool
 
-%w|ftlpool/threadpool.rb|.each do |r|
+%w|ftlpool/FtlPoolCPP
+   ftlpool/threadpool.rb
+   ftlpool/ftlpoolerror.rb|.each do |r|
   require File.expand_path(r, File.dirname(__FILE__))
 end
