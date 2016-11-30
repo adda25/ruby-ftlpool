@@ -1,0 +1,3 @@
+[submodule "ext/ThreadPool"]
+	path = ext/ThreadPool
+	url = git@github.com:adda25/ThreadPool.git
