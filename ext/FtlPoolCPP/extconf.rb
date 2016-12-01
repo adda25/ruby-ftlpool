@@ -4,7 +4,7 @@ require 'mkmf'
 
 LIBDIR      = RbConfig::CONFIG['libdir']
 INCLUDEDIR  = RbConfig::CONFIG['includedir']
-HEADER_DIRS = ["../../../../ext/ThreadPool", INCLUDEDIR]
+HEADER_DIRS = [INCLUDEDIR]
 LIB_DIRS    = [LIBDIR]
 
 puts HEADER_DIRS

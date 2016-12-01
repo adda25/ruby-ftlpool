@@ -24,7 +24,7 @@
  */
 
 #include <ruby.h>
-#include "threadpool.hpp"
+#include "ThreadPool/threadpool.hpp"
 
 /* Interface */
 
