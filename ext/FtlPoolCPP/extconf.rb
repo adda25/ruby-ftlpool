@@ -12,9 +12,9 @@ puts HEADER_DIRS
 have_library("c++") or have_library("stdc++")
 
 $CXXFLAGS = ($CXXFLAGS || "") + " " +
-            "-std=c++11 -O3 -pthread -Wall"
+            "-std=c++11 -g -pthread -Wall"
 $LDFLAGS  = ($LDFLAGS || "") + " " +
-            "-shared -fPIC"
+            " -fPIC"
 
 dir_config('FtlPoolCPP', HEADER_DIRS, LIB_DIRS)
 create_makefile('FtlPoolCPP')

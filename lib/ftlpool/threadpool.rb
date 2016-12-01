@@ -36,32 +36,17 @@ module FtlPool
   # On creation, the number of thread must be specified.
   class ThreadPool
     ##
-    # Returns the hardware thread number. It is also used as
-    # default for creating a new ThreadPool obect
-    HARDWARE_THREADS = FtlPool.hardware_threads
-    ##
     # Initialize a new `ThreadPool` object. Requires as input
     # the number of thread that handles. Default to the number
     # of hardware thread available.
     def ThreadPool.new(n = FtlPool.hardware_threads)
-      raise ArgumentError, "Pool size must be a Fixnum" unless n.is_a? Fixnum
-      raise ArgumentError, "Pool size must be positive" if n <= 0
       super(n)
     end
-    ##
-    # Resizes current `ThreadPool` thread number. Requires as input
-    # the number of thread to handle. Default to the number of hardware
-    # thread available
-    def size=(n = FtlPool.hardware_threads)
-      raise ArgumentError, "Pool size must be a Fixnum" unless n.is_a? Fixnum
-      raise ArgumentError, "Pool size must be positive" if n <= 0
-      self._resize n
-    end
 
-    #alias :sync :synchronize
-    #alias :unsynchronize :end_synchronize
-    #alias :unsync :end_synchronize
-    #alias :desync :end_synchronize
+    alias :sync :synchronize
+    alias :unsynchronize :end_synchronize
+    alias :unsync :end_synchronize
+    alias :desync :end_synchronize
 
     ##
     # Set sleep timout. It must be a positive integer.
@@ -97,7 +82,7 @@ module FtlPool
     ##
     # Set sleep timout. It must be a positive integer.
     # in nanoseconds
-    def sleep_ns=(s = 1)
+    def sleep_ns=(time = 1)
       raise ArgumentError, "Timer must be a Fixnum" unless time.is_a? Fixnum
       raise ArgumentError, "Timer must be positive" if time <= 0
       self._set_sleep_time_ns(time)
@@ -105,7 +90,7 @@ module FtlPool
     ##
     # Set sleep timout. It must be a positive integer.
     # in milliseconds
-    def sleep_ms=(s = 1)
+    def sleep_ms=(time = 1)
       raise ArgumentError, "Timer must be a Fixnum" unless time.is_a? Fixnum
       raise ArgumentError, "Timer must be positive" if time <= 0
       self._set_sleep_time_ms(time)
@@ -113,7 +98,7 @@ module FtlPool
     ##
     # Set sleep timout. It must be a positive integer.
     # in seconds
-    def sleep_s=(s = 1)
+    def sleep_s=(time = 1)
       raise ArgumentError, "Timer must be a Fixnum" unless time.is_a? Fixnum
       raise ArgumentError, "Timer must be positive" if time <= 0
       self._set_sleep_time_s(time)
@@ -149,42 +134,42 @@ module FtlPool
 
     # TODO to be completed below here!
 
-    ##
-    # Push new closure inside the `ThreadPool`. It accept
-    # * `Proc` objects (as `Array`)
-    # * `block` directly
-    def push(*lambdas, &blk)
-      if lambdas.size == 0
-        raise ArgumentError, "At least a block is required" unless block_given?
-        self.push_block(&blk)
-      else
-        # TODO We must check everything BEFORE pushing in the ThreadPool?
-        lambdas.each do |l|
-          raise ArgumentError, "All arguments must be a Proc" unless l.is_a? Proc
-        end
-        lambdas.each do |l|
-          self.push_proc l
-        end
-      end
-      self
-    end
-    alias :<< :push
-    ##
-    # Defines an handler for an Exception raised by a job
-    # in one of the thread.
-    def on_exception
-      raise ArgumentError, "Requires a block" unless block_given?
-    end
-
-    private
-    ##
+    # ##
+    # # Push new closure inside the `ThreadPool`. It accept
+    # # * `Proc` objects (as `Array`)
+    # # * `block` directly
+    # def push(*lambdas, &blk)
+    #   if lambdas.size == 0
+    #     raise ArgumentError, "At least a block is required" unless block_given?
+    #     self.push_block(&blk)
+    #   else
+    #     # TODO We must check everything BEFORE pushing in the ThreadPool?
+    #     lambdas.each do |l|
+    #       raise ArgumentError, "All arguments must be a Proc" unless l.is_a? Proc
+    #     end
+    #     lambdas.each do |l|
+    #       self.push_proc l
+    #     end
+    #   end
+    #   self
+    # end
+    # alias :<< :push
+    # ##
+    # # Defines an handler for an Exception raised by a job
+    # # in one of the thread.
+    # def on_exception
+    #   raise ArgumentError, "Requires a block" unless block_given?
+    # end
     #
-    def push_proc(p)
-      raise ArgumentError, "Requires a Proc" unless p.is_a? Proc
-    end
-
-    def push_block(&blk)
-      raise RuntimeError, "Not implemented yet"
-    end
+    # private
+    # ##
+    # #
+    # def push_proc(p)
+    #   raise ArgumentError, "Requires a Proc" unless p.is_a? Proc
+    # end
+    #
+    # def push_block(&blk)
+    #   raise RuntimeError, "Not implemented yet"
+    # end
   end # class ThreadPool
 end # module FtlPool

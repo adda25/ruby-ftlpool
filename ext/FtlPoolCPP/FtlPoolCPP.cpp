@@ -128,8 +128,13 @@ ftlpool_tp_pool_alloc(VALUE self) {
  */
 VALUE
 ftlpool_tp_pool_new(VALUE self, VALUE i) {
-  astp::ThreadPool* tp_ptr = ftlpool_tp_pool_get(self);
-  new (tp_ptr) astp::ThreadPool();
+  int k = (FIXNUM_P(i) ? NUM2INT(i) : astp::hwc());
+  try {
+    astp::ThreadPool* tp_ptr = ftlpool_tp_pool_get(self);
+    new (tp_ptr) astp::ThreadPool(k);
+  } catch (std::runtime_error e) {
+    rb_raise(rb_eRuntimeError, (char *)e.what());
+  }
   return Qnil;
 }
 
@@ -159,7 +164,11 @@ ftlpool_tp_pool_size(VALUE self) {
  */
 VALUE
 ftlpool_tp_pool_resize(VALUE self, VALUE i) {
-  ftlpool_tp_pool_get(self)->resize(NUM2INT(i));
+  try {
+    ftlpool_tp_pool_get(self)->resize(NUM2INT(i));
+  } catch (std::runtime_error e) {
+    rb_raise(rb_eRuntimeError, (char*)e.what());
+  }
   return self;
 }
 
@@ -295,6 +304,26 @@ ftlpool_tp_pool_sleep_time_ns(VALUE self) {
   return INT2NUM(ftlpool_tp_pool_get(self)->sleep_time_ns());
 }
 
+/**
+ * Pushes a new block in ThreadPool.
+ *
+ * Getting a block and preparing the lambda to push inside
+ * the ThreadPool. Now it is not working XD!
+ * @param Ruby class instance
+ * @return Ruby class instance
+ */
+VALUE
+ftlpool_tp_pool_push(VALUE self) {
+  if (!rb_block_given_p())
+    rb_raise(rb_eArgError, "Block required!");
+
+  VALUE block = rb_block_proc();
+  ftlpool_tp_pool_get(self)->push([block](){
+    rb_funcall(block, rb_intern("call"), 0);
+  });
+  return self;
+}
+
 extern "C" void
 Init_FtlPoolCPP() {
   VALUE ftlpool = rb_define_module("FtlPool");
@@ -311,9 +340,10 @@ Init_FtlPoolCPP() {
   rb_define_method(tp, "synchronize", RUBY_METHOD_FUNC(ftlpool_tp_pool_synchronize), 0);
   rb_define_method(tp, "end_synchronize", RUBY_METHOD_FUNC(ftlpool_tp_pool_end_synchronize), 0);
   rb_define_method(tp, "sleep_ns", RUBY_METHOD_FUNC(ftlpool_tp_pool_sleep_time_ns), 0);
+  rb_define_method(tp, "push", RUBY_METHOD_FUNC(ftlpool_tp_pool_push), 0);
   /* ThreadPool Class Private Methods */
   rb_define_private_method(tp, "initialize", RUBY_METHOD_FUNC(ftlpool_tp_pool_new), 1);
-  rb_define_private_method(tp, "_resize", RUBY_METHOD_FUNC(ftlpool_tp_pool_resize), 1);
+  rb_define_method(tp, "size=", RUBY_METHOD_FUNC(ftlpool_tp_pool_resize), 1);
   rb_define_private_method(tp, "_set_sleep_time_ns", RUBY_METHOD_FUNC(ftlpool_tp_pool_set_sleep_time_ns), 0);
   rb_define_private_method(tp, "_set_sleep_time_ms", RUBY_METHOD_FUNC(ftlpool_tp_pool_set_sleep_time_ms), 0);
   rb_define_private_method(tp, "_set_sleep_time_s", RUBY_METHOD_FUNC(ftlpool_tp_pool_set_sleep_time_s), 0);
